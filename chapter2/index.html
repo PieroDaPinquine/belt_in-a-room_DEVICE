@@ -383,20 +383,41 @@
    </script>
 
 <script>
+   // --- sizes measured from your repo; used to catch truncated downloads ---
+  const EXPECTED_SIZES = { "runner.data": 25769725, "game.unx": 132012094 };
+
   function mergeFiles(fileParts) {
       return new Promise((resolve, reject) => {
           let buffers = [];
 
           function fetchPart(index) {
               if (index >= fileParts.length) {
+                  const baseName = fileParts[0].replace(/\.part\d+$/, "");
+                  const total = buffers.reduce((n, b) => n + b.byteLength, 0);
+                  const wanted = EXPECTED_SIZES[baseName];
+                  console.log("[merge]", baseName, total, "bytes");
+                  if (wanted && total !== wanted) {
+                      reject(new Error(baseName + " merged to " + total + " bytes, expected " + wanted));
+                      return;
+                  }
                   let mergedBlob = new Blob(buffers);
                   let mergedFileUrl = URL.createObjectURL(mergedBlob);
                   resolve(mergedFileUrl);
                   return;
               }
-              fetch(fileParts[index]).then((response) => response.arrayBuffer()).then((data) => {
-                  buffers.push(data);
-                  fetchPart(index + 1);
+              const partUrl = fileParts[index];
+              fetch(partUrl, { cache: "no-store" }).then((response) => {
+                  if (!response.ok) {
+                      throw new Error(partUrl + " -> HTTP " + response.status);
+                  }
+                  const declared = response.headers.get("content-length");
+                  return response.arrayBuffer().then((data) => {
+                      if (declared && data.byteLength !== Number(declared)) {
+                          throw new Error(partUrl + " truncated: got " + data.byteLength + " of " + declared + " bytes");
+                      }
+                      buffers.push(data);
+                      fetchPart(index + 1);
+                  });
               }).catch(reject);
           }
           fetchPart(0);
