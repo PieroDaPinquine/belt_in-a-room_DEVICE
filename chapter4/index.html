@@ -417,7 +417,6 @@
                       if (comparable && data.byteLength !== Number(declared)) {
                           throw new Error(partUrl + " truncated: got " + data.byteLength + " of " + declared + " bytes");
                       }
-                      }
                       buffers.push(data);
                       fetchPart(index + 1);
                   });
