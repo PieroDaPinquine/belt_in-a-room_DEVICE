@@ -410,10 +410,13 @@
                   if (!response.ok) {
                       throw new Error(partUrl + " -> HTTP " + response.status);
                   }
-                  const declared = response.headers.get("content-length");
+                                   const declared = response.headers.get("content-length");
+                  const encoding = response.headers.get("content-encoding");
+                  const comparable = declared && (!encoding || encoding === "identity");
                   return response.arrayBuffer().then((data) => {
-                      if (declared && data.byteLength !== Number(declared)) {
+                      if (comparable && data.byteLength !== Number(declared)) {
                           throw new Error(partUrl + " truncated: got " + data.byteLength + " of " + declared + " bytes");
+                      }
                       }
                       buffers.push(data);
                       fetchPart(index + 1);
