@@ -459,13 +459,14 @@ XMLHttpRequest.prototype.open = function (method, url, ...rest) {
     }
     return originalOpen.call(this, method, url, ...rest);
 };
-let index = document.createElement("script");
-index.src = "index.js";
-document.body.appendChild(index);
-
-let runner = document.createElement("script");
-runner.src = "runner.js";
-document.body.appendChild(runner);
+      let index = document.createElement("script");
+      index.src = "index.js";
+      index.onload = function () {
+          let runner = document.createElement("script");
+          runner.src = "runner.js";
+          document.body.appendChild(runner);
+      };
+      document.body.appendChild(index);
   }).catch(error => {
       console.error("Failed to merge files:", error);
   });
