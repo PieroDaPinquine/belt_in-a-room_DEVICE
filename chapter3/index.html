@@ -460,13 +460,14 @@
           }
           return originalOpen.call(this, method, url, ...rest);
       };
-      let index = document.createElement("script");
+           let index = document.createElement("script");
       index.src = "index.js";
+      index.onload = function () {
+          let runner = document.createElement("script");
+          runner.src = "runner.js";
+          document.body.appendChild(runner);
+      };
       document.body.appendChild(index);
-
-      let runner = document.createElement("script");
-      runner.src = "runner.js";
-      document.body.appendChild(runner);
   }).catch(error => {
       console.error("Failed to merge files:", error);
   });
