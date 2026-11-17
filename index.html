@@ -534,7 +534,7 @@
       
       const chapterPath = `${REPO_BASE}chapter${chapter}/`;
       
-      fetch(`${chapterPath}index.html`).then(res => {
+            fetch(`${chapterPath}index.html`, { cache: "no-store" }).then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load ${chapterPath}index.html`);
         }
